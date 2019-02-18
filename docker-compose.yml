@@ -1,0 +1,58 @@
+version: '2.1'
+
+services:
+  nginx_http:
+    image: nginx
+    depends_on:
+      - spring
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_HOST=z.com
+      - NGINX_PORT=80
+    volumes:
+      - ./nginx/site.template:/etc/nginx/conf.d/site.template:ro
+      - ./nginx/nginx.template:/etc/nginx/nginx.template:ro
+    command: /bin/bash -c "envsubst '$$NGINX_HOST $$NGINX_PORT' < /etc/nginx/conf.d/site.template > /etc/nginx/conf.d/default.conf && envsubst < /etc/nginx/nginx.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+
+  spring:
+    build: ./spring
+    image: spring-petclinic
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    environment:
+      - SRC_REBUILD=yes
+      - DB_TYPE=mysql
+      - DB_FIRSTINIT=yes
+      - DB_SERVERNAME=mysql
+      - DB_BASENAME=petclinic
+      - DB_USERNAME=root
+      - DB_PASSWORD=qwerty
+      - JAVA_HOME=/usr/lib/jvm/default-jvm/jre
+    volumes:
+      - ./spring-data/src:/home/spring/src
+#    command: ping localhost
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=qwerty
+      - MYSQL_DATABASE=petclinic
+    volumes:
+      - './mariadb-data/db:/var/lib/mysql'
+      - './mariadb-data/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro'
+
+#  maria:
+#    image: 'mariadb'
+#    restart: unless-stopped
+#    environment:
+#      - MYSQL_DATABASE=petclinic
+#      - MYSQL_ROOT_PASSWORD=QwErTy123
+#      - MYSQL_USER=spring
+#      - MYSQL_PASSWORD=qwerty
+#    volumes:
+#      - './mariadb-data/db:/var/lib/mysql'
+#      - './mariadb-data/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro'
+
