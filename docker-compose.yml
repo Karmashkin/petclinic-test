@@ -20,39 +20,40 @@ services:
     build: ./spring
     image: spring-petclinic
     depends_on:
-      - mysql
+      - maria
     restart: unless-stopped
     environment:
-      - SRC_REBUILD=yes
       - DB_TYPE=mysql
       - DB_FIRSTINIT=yes
-      - DB_SERVERNAME=mysql
+      - DB_SERVERNAME=maria:3306
       - DB_BASENAME=petclinic
       - DB_USERNAME=root
-      - DB_PASSWORD=qwerty
+      - DB_PASSWORD=petclinic
       - JAVA_HOME=/usr/lib/jvm/default-jvm/jre
+#      - MAVEN_HOME=/home/spring/maven
     volumes:
       - ./spring-data/src:/home/spring/src
+#      - ./spring-data/maven:/home/spring/maven
 #    command: ping localhost
 
-  mysql:
-    image: mysql:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=qwerty
-      - MYSQL_DATABASE=petclinic
-    volumes:
-      - './mariadb-data/db:/var/lib/mysql'
-      - './mariadb-data/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro'
-
-#  maria:
-#    image: 'mariadb'
-#    restart: unless-stopped
+#  mysql:
+#    image: mysql:5.7
 #    environment:
+#      - MYSQL_ROOT_PASSWORD=qwerty
 #      - MYSQL_DATABASE=petclinic
-#      - MYSQL_ROOT_PASSWORD=QwErTy123
-#      - MYSQL_USER=spring
-#      - MYSQL_PASSWORD=qwerty
 #    volumes:
 #      - './mariadb-data/db:/var/lib/mysql'
 #      - './mariadb-data/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro'
+
+  maria:
+    image: 'mariadb'
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=petclinic
+      - MYSQL_ROOT_PASSWORD=petclinic
+      - MYSQL_USER=spring
+      - MYSQL_PASSWORD=qwerty
+    volumes:
+      - './mariadb-data/db:/var/lib/mysql'
+      - './mariadb-data/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro'
 
